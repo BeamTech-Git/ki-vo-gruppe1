@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Werkzeugkiste · Martins KI-Check</title>
+    <!-- Schriften: Cambria/Calibri (System) · Icons lokal – funktioniert ohne Internet -->
+    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="assets/praes.css">
+
+    <style>
+        /* ══ HERO ══ */
+        .sb-hero { padding: .75rem var(--pad-x) .75rem; }
+        .sb-hero .hero-inner { display: flex; align-items: center; gap: 1.5rem; }
+        .sb-hero .hero-inner > div:first-child { flex: 1; min-width: 0; }
+        .sb-hero h1 { font-size: 2.8rem; margin-top: .45rem; white-space: nowrap; }
+        .sb-hero h1 span { color: var(--navy-700); }
+        .sb-stats { display: grid; grid-template-columns: repeat(4, auto); gap: .5rem; }
+        .stat { min-width: 5.4rem; padding: .3rem .75rem; border-radius: .75rem; background: var(--card); }
+        .stat b { display: block; font-family: var(--f-display); font-weight: 700; font-size: 1.8rem; line-height: 1.05; font-variant-numeric: tabular-nums; font-size-adjust: none; }
+        .stat span { display: block; margin-top: .2rem; font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+        .stat--all { background: var(--navy-700); }
+        .stat--all span { color: rgba(255,255,255,.85); }
+        .stat--all b { color: #fff; }
+        .stat--ok b { color: #166534; } .stat--wip b { color: #854d0e; } .stat--off b { color: #b91c1c; }
+        .sb-meter { grid-column: 1 / -1; display: flex; gap: 3px; height: .4rem; border-radius: 99px; overflow: hidden; background: var(--card); }
+        .sb-meter i { display: block; height: 100%; width: 0; transition: width 1.2s var(--ease); }
+        .sb-meter .ok { background: #22c55e; } .sb-meter .wip { background: #f59e0b; transition-delay: .2s; } .sb-meter .off { background: #ef4444; transition-delay: .4s; }
+        .sb-plus { grid-column: 1 / -1; justify-self: end; display: inline-flex; margin-top: -.15rem; align-items: center; gap: .4rem; font-size: .78rem; font-weight: 700; color: var(--navy-700); }
+        .sb-plus i { font-style: normal; display: inline-block; width: .55rem; height: .55rem; border-radius: 2px; background: var(--accent); }
+
+        /* ══ WERKZEUGKISTE ══ */
+        .sb-area { display: grid; gap: .6rem; padding: .7rem var(--pad-x) .6rem; }
+        .board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; align-items: stretch; }
+        .col {
+            display: flex; flex-direction: column; gap: .5rem;
+        }
+        .col--ok  { --c: #16a34a; --cb: #dcfce7; --ct: #14532d; --hb: var(--navy-700); --ht: #fff; }
+        .col--wip { --c: #d97706; --cb: #fef3c7; --ct: #6b4500; --hb: #3B57B0; --ht: #fff; }
+        .col--off { --c: #dc2626; --cb: #fee2e2; --ct: #7f1d1d; --hb: var(--card); --ht: var(--navy); }
+        .col-head { display: flex; align-items: center; justify-content: center; gap: .6rem; height: 2.3rem; padding: 0 .8rem; border-radius: .7rem; background: var(--hb); color: var(--ht); }
+        .col--off .col-head { border: 1.5px dashed var(--mid); }
+        .col-title { display: flex; align-items: center; gap: .5rem; font-family: var(--f-display); font-size: 1.12rem; font-weight: 700; font-size-adjust: none; }
+        .col-count { font-size: .82rem; font-weight: 700; padding: .05rem .55rem; border-radius: 99px; background: #fff; color: var(--navy); }
+        .col-empty { flex: 1; display: grid; place-items: center; min-height: 3rem; border-radius: .8rem; border: 1.5px dashed var(--line-2); color: var(--muted); font-size: .86rem; font-weight: 600; }
+
+        .wk {
+            position: relative; display: block; width: 100%; text-align: left;
+            padding: .55rem .9rem .55rem .95rem; border-radius: .8rem; background: var(--card);
+            transition: transform .25s var(--ease), box-shadow .25s;
+        }
+        .wk:hover { transform: translateY(-2px); box-shadow: var(--sh-2); }
+        .wk-head { display: flex; align-items: center; gap: .6rem; }
+        .wk-ic { flex-shrink: 0; display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 50%; background: #fff; color: var(--ct); font-size: .88rem; }
+        .wk-t { display: block; font-family: var(--f-display); font-size: 1.12rem; font-weight: 700; line-height: 1.25; color: var(--navy); font-size-adjust: none; }
+        .wk-s { display: block; margin-top: .3rem; font-size: .95rem; line-height: 1.35; color: var(--ink); }
+        .wk .ref { margin-top: .2rem; }
+
+        /* Die Karte, die live geöffnet wird: sanftes Pulsieren + „Details“ */
+        .wk.is-focus { box-shadow: inset 0 0 0 2px #4ade80; animation: rise .6s var(--ease) backwards, focusPulse 2.6s 2.2s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 65ms + var(--d0, 0ms)), 2.2s; }
+        @keyframes focusPulse {
+            0%, 100% { box-shadow: inset 0 0 0 2px #4ade80, 0 0 0 0 rgba(34,197,94,0); }
+            50%      { box-shadow: inset 0 0 0 2px #4ade80, 0 0 0 .4rem rgba(34,197,94,.2); }
+        }
+        .wk-more { position: absolute; top: .55rem; right: .6rem; padding: .1rem .5rem; border-radius: 99px; background: var(--navy-700); color: #fff; font-size: .7rem; font-weight: 700; }
+
+        /* Gesetzesänderung: bewusst außerhalb der Ampel */
+        .gesetz {
+            display: flex; align-items: center; gap: 1rem; width: 100%; text-align: left;
+            padding: .4rem 1.1rem; border-radius: .9rem;
+            background: var(--accent-50); border: 1.5px solid var(--accent);
+            transition: transform .25s var(--ease), box-shadow .25s;
+        }
+        .gesetz:hover { transform: translateY(-2px); box-shadow: var(--sh-2); }
+        .gesetz-ic { flex-shrink: 0; display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--navy); color: var(--accent); font-size: 1rem; }
+        .gesetz-l { flex-shrink: 0; padding: .15rem .6rem; border-radius: 99px; background: var(--navy); color: #fff; font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+        .gesetz-t { font-family: var(--f-display); font-size: 1.12rem; font-weight: 700; color: var(--navy); white-space: nowrap; font-size-adjust: none; }
+        .gesetz-s { font-size: 1rem; color: var(--ink); }
+        .gesetz .ref { margin: 0 0 0 auto; white-space: nowrap; }
+
+        /* ══ FAZIT ══ */
+        .schluss { padding: .7rem 1.4rem; align-items: flex-start; }
+        .schluss-h { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+        .schluss .kern-t { font-size: 1.22rem; }
+        .merk { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; margin-top: .5rem; }
+        .merk span { display: flex; align-items: flex-start; gap: .45rem; padding: .38rem .6rem; border-radius: .6rem; background: rgba(255,255,255,.1); font-size: .92rem; line-height: 1.35; color: #fff; }
+        .merk b { flex-shrink: 0; font-weight: 400; }
+        .frage { font-family: var(--f-display); font-size: .95rem; font-style: italic; color: var(--accent); white-space: nowrap; font-size-adjust: none; }
+    </style>
+</head>
+<body>
+    <nav id="nav"></nav>
+
+    <main class="stage" id="stage">
+        <section class="hero sb-hero">
+            <div class="rays"><span></span><span></span><span></span></div>
+            <div class="hero-inner on-dark">
+                <div>
+                    <div class="kicker">Kapitel 3 · Martins Werkzeugkiste · Stand 27.10.2026</div>
+                    <h1 class="display">Was hat Martin <span>heute in der Hand?</span></h1>
+                </div>
+                <div class="sb-stats">
+                    <div class="stat stat--all"><b id="nAll">0</b><span>Bauanleitungen</span></div>
+                    <div class="stat stat--ok"><b id="nOk">0</b><span>🟢 Fertig</span></div>
+                    <div class="stat stat--wip"><b id="nWip">0</b><span>🟡 In Arbeit</span></div>
+                    <div class="stat stat--off"><b id="nOff">0</b><span>🔴 Fehlt</span></div>
+                    <div class="sb-meter" aria-hidden="true"><i class="ok"></i><i class="wip"></i><i class="off"></i></div>
+                    <span class="sb-plus"><i></i>+ 1 Gesetzesänderung (unten)</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="sb-area">
+            <section class="board" id="board"></section>
+            <button class="gesetz rise" id="gesetz" style="--d0:1000ms"></button>
+            <div class="kern schluss rise" id="schluss" style="--d0:1400ms"></div>
+        </div>
+    </main>
+
+    <footer id="dock"></footer>
+
+    <script src="assets/daten.js"></script>
+    <script src="assets/praes.js"></script>
+    <script>
+    (function () {
+        'use strict';
+        const { ampel, ref, esc } = Praes;
+
+        Praes.init({ station: 3, kapitel: 3 });
+        Praes.setSub('Kapitel 3 · Werkzeugkiste');
+
+        const byStatus = s => KARTEN.filter(k => k.status === s);
+        const n = { ok: byStatus('ok').length, wip: byStatus('wip').length, off: byStatus('off').length };
+        const FARBE = { ok: '#22c55e', wip: '#f59e0b', off: '#ef4444' };
+
+        /* ── Zähler + Verhältnisbalken (nur Bauanleitungen) ── */
+        Praes.countUp(document.getElementById('nAll'), KARTEN.length, { delay: 250 });
+        Praes.countUp(document.getElementById('nOk'),  n.ok,  { delay: 450 });
+        Praes.countUp(document.getElementById('nWip'), n.wip, { delay: 650 });
+        Praes.countUp(document.getElementById('nOff'), n.off, { delay: 850 });
+        setTimeout(() => {
+            const m = document.querySelectorAll('.sb-meter i');
+            ['ok', 'wip', 'off'].forEach((s, i) => { m[i].style.width = (n[s] / KARTEN.length * 100) + '%'; });
+        }, 350);
+
+        /* ── Drei Ampel-Spalten ── */
+        let idx = 0;
+        document.getElementById('board').innerHTML = ['ok', 'wip', 'off'].map((s, ci) => `
+            <div class="col col--${s}">
+                <div class="col-head rise" style="--i:${ci};--d0:250ms">
+                    <span class="col-title">${STATUS[s].emoji} ${STATUS[s].label}</span>
+                    <span class="col-count">${n[s]}</span>
+                </div>
+                ${byStatus(s).map(k => `
+                <button class="wk rise${k.nr === 1 ? ' is-focus' : ''}" style="--i:${idx++};--d0:500ms" data-nr="${k.nr}">
+                    ${k.nr === 1 ? '<span class="wk-more">Details ›</span>' : ''}
+                    <span class="wk-head"><span class="wk-ic"><i class="fa-solid ${k.icon}"></i></span><span class="wk-t">${esc(k.titel)}</span></span>
+                    <span class="wk-s">${esc(k.satz)}</span>
+                    ${ref(k.ref)}
+                </button>`).join('')}
+                ${n[s] < 2 ? '<div class="col-empty rise" style="--d0:900ms">noch leer</div>' : ''}
+            </div>`).join('');
+
+        function zeige(k, color, kicker) {
+            Praes.modal.open(Praes.modalSimple({ kicker, title: k.titel, saetze: k.modal, ref: k.refModal || k.ref, quelle: k.quelle }), { color });
+        }
+
+        document.getElementById('board').addEventListener('click', e => {
+            const b = e.target.closest('.wk');
+            if (!b) return;
+            const k = KARTEN.find(x => x.nr === Number(b.dataset.nr));
+            zeige(k, FARBE[k.status], ampel(k.status));
+        });
+
+        /* ── Gesetzesänderung: keine Bauanleitung ── */
+        const g = document.getElementById('gesetz');
+        g.innerHTML = `
+            <span class="gesetz-ic"><i class="fa-solid ${GESETZ.icon}"></i></span>
+            <span class="gesetz-l">${esc(GESETZ.label)}</span>
+            <span class="gesetz-t">${esc(GESETZ.titel)}</span>
+            <span class="gesetz-s">${esc(GESETZ.satz)}</span>
+            ${ref(GESETZ.ref)}`;
+        g.addEventListener('click', () => zeige(GESETZ, '#3b82f6', `<span class="gesetz-l">${esc(GESETZ.label)}</span>`));
+
+        /* ── Fazit: Kernsatz + drei Merksätze + Schlussfrage ── */
+        document.getElementById('schluss').innerHTML = `
+            <span class="kern-ic">→</span>
+            <span style="flex:1">
+                <span class="schluss-h"><span class="kern-k">Fazit</span><span class="frage">${esc(SCHLUSS.frage)}</span></span>
+                <span class="kern-t">${esc(SCHLUSS.kern)}</span>
+                <span class="merk">${SCHLUSS.merksaetze.map(m =>
+                    `<span><b>${m.status ? STATUS[m.status].emoji : '➜'}</b>${esc(m.text)}</span>`).join('')}</span>
+            </span>`;
+    })();
+    </script>
+</body>
+</html>

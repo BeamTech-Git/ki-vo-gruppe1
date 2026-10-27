@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gefährlich? & Pflichten · Martins KI-Check</title>
+    <!-- Schriften: Cambria/Calibri (System) · Icons lokal – funktioniert ohne Internet -->
+    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="assets/praes.css">
+
+    <style>
+        /* ══ HERO: Frage des Kapitels ══ */
+        .ek-hero { padding: 1.15rem var(--pad-x) 1.15rem; }
+        .ek-hero .hero-inner { display: flex; align-items: center; gap: 1.5rem; }
+        .ek-hero #heroText { flex: 1; min-width: 0; }
+        .ek-hero h1 { font-size: 2.9rem; margin-top: .5rem; white-space: nowrap; }
+        .ek-hero h1 span { color: var(--accent); }
+        .ek-hero .eu-ring { width: 4.6rem; height: 4.6rem; }
+        .ek-hero .swap { animation: fade .5s ease backwards; }
+        /* Fortschritts-Pills auf dunklem Kopf (wie Startseite) */
+        .pills { display: flex; align-items: center; gap: .35rem; }
+        .pill {
+            display: inline-flex; align-items: center; gap: .4rem; height: 1.9rem; padding: 0 .85rem 0 .3rem; border-radius: 99px;
+            background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); color: rgba(255,255,255,.7);
+            font-size: .84rem; font-weight: 700; white-space: nowrap; transition: all .35s var(--ease);
+        }
+        .pill .pn { display: grid; place-items: center; width: 1.3rem; height: 1.3rem; border-radius: 50%; background: rgba(255,255,255,.14); color: #fff; font-size: .74rem; }
+        .pill.is-cur { background: var(--navy-700); border-color: var(--mid); color: #fff; }
+        .pill.is-cur .pn { background: var(--accent); color: var(--navy); }
+        .pill.is-done { background: rgba(255,255,255,.14); color: #fff; }
+        .pill.is-done .pn { background: #fff; color: var(--navy); }
+        .pills .arr { color: rgba(255,255,255,.45); }
+
+        #stage { display: flex; flex-direction: column; }
+        .ek-area { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 1.1rem var(--pad-x) 1rem; }
+        .card { background: var(--card); border-radius: .9rem; }
+        .slide    { animation: slideIn .5s var(--ease) backwards; }
+        .is-back  { animation-name: slideBack; }
+        @keyframes slideIn   { from { opacity: 0; transform: translateX(1.8rem); } }
+        @keyframes slideBack { from { opacity: 0; transform: translateX(-1.8rem); } }
+
+        /* ══ FRAGE ══ */
+        .q { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2.5rem; padding: 2.8rem 3rem; align-items: center; }
+        .q-nr { font-size: .8rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--navy-700); }
+        .q-frage { margin-top: .5rem; font-family: var(--f-display); font-size: 2.3rem; font-weight: 700; line-height: 1.2; letter-spacing: -.01em; color: var(--navy); font-size-adjust: none; }
+        .q-hilfe { margin-top: .9rem; font-size: 1.18rem; line-height: 1.45; color: var(--text-2); }
+        .q-btns { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+        .ans {
+            position: relative; display: flex; align-items: center; justify-content: center; gap: .6rem;
+            height: 5rem; border-radius: 1rem; border: 2px solid var(--line-2); background: #fff;
+            font-size: 1.6rem; font-weight: 800; color: var(--navy);
+            transition: transform .2s var(--ease), box-shadow .2s, border-color .2s, background .2s, opacity .3s;
+        }
+        .ans:hover { border-color: var(--navy-700); transform: translateY(-2px); box-shadow: var(--sh-2); }
+        .ans.is-ex { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,204,0,.28); }
+        .ans-badge {
+            position: absolute; top: -.7rem; left: 50%; transform: translateX(-50%);
+            display: inline-flex; align-items: center; gap: .3rem; padding: .15rem .55rem; border-radius: 99px;
+            background: var(--navy); color: var(--accent); font-size: .56rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
+        }
+        .answered .ans { opacity: .4; }
+        .answered .ans.is-chosen { opacity: 1; background: var(--navy); border-color: var(--navy); color: #fff; box-shadow: 0 10px 24px rgba(13,31,60,.25); }
+        .reveal {
+            padding: 1.1rem 1.3rem; border-radius: .9rem;
+            background: #fff; border: 2px solid var(--accent);
+            animation: revealIn .55s var(--ease) backwards;
+        }
+        @keyframes revealIn { from { opacity: 0; transform: translateY(.8rem); } }
+        .reveal-t { font-size: 1.4rem; font-weight: 700; line-height: 1.35; color: var(--navy); }
+        .reveal-box { margin-top: 1.2rem; min-height: 9.6rem; } /* Platz unsichtbar reserviert: Karte springt beim Aufdecken nicht */
+        
+
+        /* ══ ERGEBNIS KAPITEL 1 ══ */
+        .res { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 1rem; }
+        .res-main { position: relative; overflow: hidden; padding: 2rem 2.1rem; }
+        .res--hr   { --rc: #f97316; --rt: #9a3412; --rb: #ffedd5; }
+        .res--safe { --rc: #16a34a; --rt: #15803d; --rb: #ecfdf3; }
+        .res-top { display: flex; align-items: center; gap: 1rem; }
+        .res-ic { flex-shrink: 0; display: grid; place-items: center; width: 4.2rem; height: 4.2rem; border-radius: 50%; background: var(--rb); color: var(--rt); font-size: 1.7rem; box-shadow: 0 0 0 .45rem color-mix(in srgb, var(--rc) 12%, transparent); animation: pop .7s .15s var(--ease) backwards; }
+        @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+        .res-k { font-size: .74rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--navy-700); }
+        .res-t { font-family: var(--f-display); font-size: 3.3rem; font-weight: 700; line-height: 1.05; color: var(--rt); font-size-adjust: none; }
+        .res-s { margin-top: 1.2rem; font-size: 1.35rem; font-weight: 600; line-height: 1.4; color: var(--navy); }
+
+        .anl { padding: 2rem 2.1rem; background: #fff; border: 1.5px dashed var(--mid); }
+        .anl-h { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+        .anl-k { display: flex; align-items: center; gap: .55rem; font-family: var(--f-display); font-size: 1.3rem; font-weight: 700; color: var(--navy); font-size-adjust: none; }
+        .anl-k i { color: var(--navy-700); }
+        .anl-t { margin-top: 1rem; font-size: 1.15rem; line-height: 1.5; color: var(--text-2); }
+        .anl-def { display: flex; align-items: center; gap: .6rem; margin-top: .9rem; padding: .55rem .85rem; border-radius: .6rem; background: var(--card); font-size: 1.08rem; font-weight: 700; color: var(--navy); }
+        .anl-def i { color: var(--navy-700); }
+        .anl a { display: inline-block; margin-top: .6rem; font-size: .88rem; font-weight: 700; color: var(--navy-700); text-decoration: none; border-bottom: 1px solid rgba(20,60,123,.3); }
+        .res-kern { grid-column: 1 / -1; padding: 1.2rem 1.6rem; }
+        .res-kern .kern-t { font-size: 1.35rem; }
+
+        /* ══ KAPITEL 2: PFLICHTEN ══ */
+        .k2 { display: grid; gap: 1rem; }
+        .rolle { display: flex; align-items: center; gap: 1rem; padding: .9rem 1.4rem; }
+        .rolle-av { flex-shrink: 0; display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--accent); color: var(--navy); font-family: var(--f-display); font-size: 1rem; font-weight: 700; }
+        .rolle-s { font-family: var(--f-display); font-size: 1.3rem; font-weight: 700; color: var(--navy); line-height: 1.3; font-size-adjust: none; }
+        .rolle .ref { margin-top: .15rem; }
+
+        .pfl { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .8rem; }
+        .pf {
+            position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: .45rem;
+            padding: 1rem 1rem .9rem; text-align: left; overflow: hidden;
+            transition: transform .25s var(--ease), box-shadow .25s;
+        }
+        .pf:hover { transform: translateY(-3px); box-shadow: var(--sh-2); }
+        .pf-ic { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: .75rem; background: var(--navy); color: var(--accent); font-size: 1.1rem; }
+        .pf-t { font-family: var(--f-display); font-size: 1.08rem; font-weight: 700; line-height: 1.25; color: var(--navy); hyphens: manual; font-size-adjust: none; }
+        .pf-b { font-size: .92rem; font-style: italic; line-height: 1.35; color: var(--text-2); flex: 1; }
+        .pf .ref { margin-top: 0; }
+        .pf--ok { box-shadow: inset 0 0 0 2px #4ade80; }
+        .pf--ok .pf-ic { background: #16a34a; color: #fff; }
+
+        .k2-end { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 1rem; }
+        .begriff { padding: 1rem 1.3rem; }
+        .begriff-k { font-size: .7rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--navy-700); }
+        .begriff-t { margin-top: .25rem; font-size: 1.05rem; line-height: 1.45; color: var(--ink); }
+        .begriff-t b { color: var(--navy); }
+    </style>
+</head>
+<body>
+    <nav id="nav"></nav>
+
+    <main class="stage" id="stage">
+        <section class="hero hero--dark ek-hero">
+            <div class="rays"><span></span><span></span><span></span></div>
+            <div class="hero-inner">
+                <div id="heroText"></div>
+                <div class="pills" id="pills"></div>
+            </div>
+        </section>
+        <div class="ek-area" id="area"></div>
+    </main>
+
+    <footer id="dock"></footer>
+
+    <script src="assets/daten.js"></script>
+    <script src="assets/praes.js"></script>
+    <script>
+    (function () {
+        'use strict';
+        const { ampel, ref, esc, nb } = Praes;
+
+        const area = document.getElementById('area');
+        const KAP = {
+            1: { kicker: 'Kapitel 1 · Einstufung', frage: 'Ist TalentMatch <span>gefährlich?</span>' },
+            2: { kicker: 'Kapitel 2 · Pflichten',  frage: 'Was muss Martin <span>tun?</span>' }
+        };
+
+        // Zustand: { v: 'q', id, ans } | { v: 'res', id } | { v: 'k2' }
+        let st = { v: 'q', id: 'q1', ans: null };
+        let hist = [];
+        let shownKap = 0;
+        let busy = false;
+
+        const kapOf = s => (s.v === 'k2' ? 2 : 1);
+
+        /* ── Kopfbereich: Frage des Kapitels + Fortschritt ── */
+        function hero(s) {
+            const k = kapOf(s);
+            if (k !== shownKap) {
+                document.getElementById('heroText').innerHTML =
+                    `<div class="kicker swap">${KAP[k].kicker}</div><h1 class="display swap">${KAP[k].frage}</h1>`;
+                shownKap = k;
+                Praes.setKapitel(k);
+                Praes.fitHeadlines();
+            }
+            const pills = document.getElementById('pills');
+            if (k === 2) { pills.innerHTML = ''; return; }
+            const pos = s.v === 'res' ? 2 : (s.id === 'q1' ? 0 : 1);
+            pills.innerHTML = ['Frage 1', 'Frage 2', 'Ergebnis'].map((l, i) =>
+                (i ? '<span class="arr">›</span>' : '') +
+                `<span class="pill ${i === pos ? 'is-cur' : (i < pos ? 'is-done' : '')}"><span class="pn">${i < pos ? '✓' : i + 1}</span>${l}</span>`).join('');
+        }
+
+        function sub(s) {
+            if (s.v === 'k2') return 'Kapitel 2 · Pflichten';
+            if (s.v === 'res') return 'Kapitel 1 · Ergebnis';
+            return `Kapitel 1 · Frage ${BAUM[s.id].nr}/2`;
+        }
+
+        function render(s, back) {
+            st = s;
+            hero(s);
+            Praes.setSub(sub(s));
+            area.innerHTML = '';
+            if (s.v === 'q') renderFrage(s, back);
+            else if (s.v === 'res') renderErgebnis(s, back);
+            else renderPflichten(back);
+        }
+
+        /* ── Frage mit aufklappender Antwort ── */
+        function renderFrage(s, back) {
+            const n = BAUM[s.id];
+            const btn = (a, label) => `<button class="ans${n.beispiel === a ? ' is-ex' : ''}" data-a="${a}">
+                ${n.beispiel === a ? '<span class="ans-badge">● Martins Fall</span>' : ''}${label}</button>`;
+            const card = document.createElement('article');
+            card.className = 'card q slide' + (back ? ' is-back' : '');
+            card.innerHTML = `
+                <div>
+                    <div class="q-nr">Frage ${n.nr} von 2</div>
+                    <div class="q-frage">${esc(n.frage)}</div>
+                    <div class="q-hilfe">${esc(n.hilfe)}</div>
+                    ${ref(n.ref)}
+                </div>
+                <div class="q-side">
+                    <div class="q-btns">${btn('yes', 'Ja')}${btn('no', 'Nein')}</div>
+                    <div id="reveal" class="reveal-box"></div>
+                </div>`;
+            area.appendChild(card);
+            card.querySelectorAll('.ans').forEach(b => b.addEventListener('click', () => antworten(b.dataset.a)));
+            if (s.ans) zeigeAntwort(s.ans, false);
+        }
+
+        function zeigeAntwort(a) {
+            const n = BAUM[st.id];
+            const card = area.querySelector('.q');
+            card.classList.add('answered');
+            card.querySelectorAll('.ans').forEach(b => b.classList.toggle('is-chosen', b.dataset.a === a));
+            document.getElementById('reveal').innerHTML = `<div class="reveal">
+                <div class="reveal-t">${esc(n[a].text)}</div>
+                ${ref(n[a].ref)}
+            </div>`;
+        }
+
+        function antworten(a) {
+            if (busy) return;
+            if (st.ans === a) return;
+            if (!st.ans) hist.push({ ...st });
+            st = { ...st, ans: a };
+            zeigeAntwort(a);
+            sperre();
+        }
+
+        function sperre() { busy = true; setTimeout(() => { busy = false; }, 300); }
+
+        /* ── Ergebnis von Kapitel 1 ── */
+        function renderErgebnis(s, back) {
+            const e = ERGEBNIS[s.id];
+            const hr = s.id === 'hr';
+            const wrap = document.createElement('div');
+            wrap.className = 'res slide' + (back ? ' is-back' : '');
+            wrap.innerHTML = `
+                <article class="card res-main res--${s.id}">
+                    <div class="res-top">
+                        <span class="res-ic"><i class="fa-solid ${hr ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i></span>
+                        <div><div class="res-k">Ergebnis für TalentMatch</div><div class="res-t">${esc(e.titel)}</div></div>
+                    </div>
+                    <div class="res-s">${esc(e.satz)}</div>
+                    ${ref(e.ref)}
+                </article>
+                ${hr ? `
+                <article class="card anl rise" style="--d0:450ms">
+                    <div class="anl-h">
+                        <span class="anl-k"><i class="fa-solid fa-screwdriver-wrench"></i>Gibt es schon die Bauanleitung?</span>
+                        ${ampel(e.anleitung.status, { big: true, label: 'Nur Entwurf', delay: 900 })}
+                    </div>
+                    <div class="anl-def"><i class="fa-solid fa-book-open"></i>${esc(e.anleitung.begriff)}</div>
+                    <div class="anl-t">${nb(esc(e.anleitung.text))}</div>
+                    ${ref(e.anleitung.ref)}
+                    <a href="status-board.html">Zur Werkzeugkiste →</a>
+                </article>
+                <div class="kern res-kern rise" style="--d0:900ms">
+                    <span class="kern-ic">→</span>
+                    <span><span class="kern-k">Kernsatz</span><span class="kern-t">${esc(e.kern)}</span></span>
+                </div>` : `
+                <article class="card anl">
+                    <div class="anl-k"><i class="fa-solid fa-rotate-left"></i>Martins Fall liegt anders</div>
+                    <div class="anl-t">TalentMatch steht auf der Liste und fällt unter keine Ausnahme.</div>
+                    <a href="#" id="neu">Zurück zu Frage 1 →</a>
+                </article>`}`;
+            area.appendChild(wrap);
+            const neu = wrap.querySelector('#neu');
+            if (neu) neu.addEventListener('click', ev => { ev.preventDefault(); hist = []; render({ v: 'q', id: 'q1', ans: null }, true); });
+        }
+
+        /* ── Kapitel 2: Fünf Pflichten ── */
+        function renderPflichten(back) {
+            const wrap = document.createElement('div');
+            wrap.className = 'k2 slide' + (back ? ' is-back' : '');
+            wrap.innerHTML = `
+                <div class="card rolle">
+                    <span class="rolle-av">MK</span>
+                    <div><div class="rolle-s">${esc(ANBIETER.satz)}</div>${ref(ANBIETER.ref)}</div>
+                </div>
+                <div class="pfl">${PFLICHTEN.map((p, i) => `
+                    <button class="card pf pf--${p.status} rise" style="--i:${i};--d0:250ms" data-id="${p.id}">
+                        <span class="pf-ic"><i class="fa-solid ${p.icon}"></i></span>
+                        <span class="pf-t">${esc(p.titel)}</span>
+                        <span class="pf-b">„${esc(p.beispiel)}“</span>
+                        ${ampel(p.status, { label: p.anleitung, delay: 700 + i * 120 })}
+                        ${ref(p.ref)}
+                    </button>`).join('')}
+                </div>
+                <div class="k2-end">
+                    <div class="card begriff rise" style="--d0:1000ms">
+                        <div class="begriff-k">Erinnerung</div>
+                        <div class="begriff-t"><b>${esc(FACHBEGRIFF.wort)}</b> = ${esc(FACHBEGRIFF.satz)}</div>
+                        ${ref(FACHBEGRIFF.ref)}
+                    </div>
+                    <div class="kern rise" style="--d0:1250ms">
+                        <span class="kern-ic">→</span>
+                        <span><span class="kern-k">Kernsatz</span><span class="kern-t">${esc(KERN_PFLICHTEN)}</span></span>
+                    </div>
+                </div>`;
+            area.appendChild(wrap);
+            wrap.querySelector('.pfl').addEventListener('click', e => {
+                const b = e.target.closest('.pf');
+                if (b) oeffnePflicht(b.dataset.id);
+            });
+        }
+
+        function oeffnePflicht(id) {
+            const p = PFLICHTEN.find(x => x.id === id);
+            const k = KARTEN.find(x => x.nr === p.karte);
+            Praes.modal.open(Praes.modalSimple({
+                kicker: ampel(p.status, { label: p.anleitung }),
+                title: p.titel.replace('­', ''),
+                saetze: p.text,
+                ref: p.ref,
+                quelle: k && k.quelle
+            }), { color: p.status === 'ok' ? '#22c55e' : '#f59e0b' });
+        }
+
+        /* ── Presenter: → folgt Martins Fall, ← geht zurück ── */
+        function weiter() {
+            if (busy) return true;
+            if (st.v === 'q' && !st.ans) { antworten(BAUM[st.id].beispiel); return true; }
+            if (st.v === 'q') {
+                const nx = BAUM[st.id][st.ans].next;
+                hist.push({ ...st }); sperre();
+                render(nx.startsWith('q') ? { v: 'q', id: nx, ans: null } : { v: 'res', id: nx });
+                return true;
+            }
+            if (st.v === 'res' && st.id === 'hr') { hist.push({ ...st }); sperre(); render({ v: 'k2' }); return true; }
+            return false;
+        }
+
+        function zurueck() {
+            if (busy || !hist.length) return false;
+            sperre();
+            render(hist.pop(), true);
+            return true;
+        }
+
+        // Aus Seite 3 zurück? Dann bei Kapitel 2 weitermachen
+        const vonSeite3 = Praes.flags().from === 3;
+
+        Praes.init({ station: 2, kapitel: 1, onNext: weiter, onPrev: zurueck });
+
+        const PFAD = [
+            { v: 'q', id: 'q1', ans: null }, { v: 'q', id: 'q1', ans: 'yes' },
+            { v: 'q', id: 'q2', ans: null }, { v: 'q', id: 'q2', ans: 'no' },
+            { v: 'res', id: 'hr' }
+        ];
+        if (vonSeite3 || location.hash === '#pflichten') { hist = PFAD.slice(); render({ v: 'k2' }, vonSeite3); }
+        else render({ v: 'q', id: 'q1', ans: null });
+    })();
+    </script>
+</body>
+</html>
