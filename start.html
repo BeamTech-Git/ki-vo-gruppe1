@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Start · Martins KI-Check</title>
-    <!-- Schriften: Cambria/Calibri (System) · Icons lokal – funktioniert ohne Internet -->
+    <!-- Schriften: Cambria/Calibri (System) · Icons lokal, funktioniert ohne Internet -->
     <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
     <link rel="stylesheet" href="assets/praes.css">
 
@@ -75,17 +75,114 @@
 
         .st-kern { padding: 1.05rem 1.5rem; }
         .st-kern .kern-t { font-size: 1.3rem; }
+
+        /* ══ SZENE 1: Schätzfrage ══ */
+        .tipps { display: flex; gap: 1.2rem; margin: .6rem 0 .4rem; }
+        .tipp {
+            display: grid; place-items: center; width: 7.5rem; height: 7.5rem; border-radius: 1.2rem;
+            border: 2px solid rgba(255,255,255,.28); background: rgba(255,255,255,.05);
+            font-family: var(--f-display); font-size: 3.6rem; font-weight: 700; color: #fff; font-size-adjust: none;
+        }
+        .tipp:nth-child(2) { animation-name: rise, wobble; animation-duration: .6s, 4s; animation-delay: calc(var(--i) * 65ms + var(--d0)), 2.5s; animation-iteration-count: 1, infinite; }
+        @keyframes wobble { 0%, 90%, 100% { transform: none; } 94% { transform: rotate(-3deg); } 97% { transform: rotate(3deg); } }
+
+        /* ══ SZENE 2: Ihr seid die KI ══ */
+        .cvs { display: grid; grid-template-columns: repeat(2, 19rem); gap: 2.5rem; }
+        .cv {
+            position: relative; padding: 1.2rem 1.4rem 1.1rem; border-radius: 1rem; text-align: left;
+            background: #fff; color: var(--ink); box-shadow: 0 18px 40px rgba(0,0,0,.3);
+            transition: box-shadow .5s, transform .5s var(--ease);
+        }
+        .cv-h { display: flex; align-items: center; gap: .8rem; padding-bottom: .7rem; margin-bottom: .7rem; border-bottom: 1px solid var(--line); }
+        .cv-av { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--card); color: var(--navy-700); font-size: 1.1rem; }
+        .cv-n { font-family: var(--f-display); font-size: 1.3rem; font-weight: 700; color: var(--navy); font-size-adjust: none; }
+        .cv ul { list-style: none; display: grid; gap: .4rem; font-size: 1.12rem; }
+        .cv li { display: flex; align-items: center; gap: .6rem; }
+        .cv li i { width: 1.1rem; color: var(--navy-700); font-size: .9rem; text-align: center; }
+        .cv mark { position: relative; z-index: 0; background: none; color: inherit; transition: color .4s; }
+        .cv mark::after { content: ''; position: absolute; left: -.1em; right: -.1em; bottom: .05em; height: .45em; border-radius: 2px; background: rgba(239,68,68,.35); transform: scaleX(0); transform-origin: left; transition: transform .5s var(--ease); z-index: -1; }
+        .sterne { display: flex; gap: .25rem; margin-top: .8rem; height: 1.8rem; font-size: 1.6rem; line-height: 1; }
+        .sterne i { color: #d6dcea; opacity: 0; transform: scale(.4); transition: opacity .35s, transform .45s var(--ease), color .35s; }
+        /* Fallender Stern liegt über einem grauen Platzhalter: keine Lücke */
+        .fs { position: relative; display: inline-block; }
+        .fs .faellt { position: absolute; left: 0; top: 0; }
+        .cv-badge { position: absolute; top: -.75rem; right: 1rem; padding: .2rem .7rem; border-radius: 99px; background: #dc2626; color: #fff; font-size: .8rem; font-weight: 700; letter-spacing: .06em; opacity: 0; transform: translateY(.4rem); transition: opacity .4s, transform .4s var(--ease); }
+
+        .szene.is-bewertet .sterne i { opacity: 1; transform: none; transition-delay: calc(var(--n) * 110ms); }
+        .szene.is-bewertet .sterne i.an { color: #f5b400; }
+        /* Bewerbung B: zwei Sterne fallen nach kurzer Pause herunter */
+        .szene.is-bewertet .cv--b .sterne i.faellt { animation: faellt .9s 1.5s cubic-bezier(.5,0,.75,0) forwards; }
+        @keyframes faellt { 0% { color: #f5b400; } 25% { transform: translateY(-.3rem) rotate(-10deg); color: #f5b400; } 100% { transform: translateY(5rem) rotate(50deg); opacity: 0; color: #f5b400; } }
+        .szene.is-bewertet .cv--b { box-shadow: 0 0 0 3px #ef4444, 0 18px 40px rgba(0,0,0,.3); transition-delay: 2.2s; }
+        .szene.is-bewertet .cv--b mark::after { transform: scaleX(1); transition-delay: 2.2s; }
+        .szene.is-bewertet .cv--b .cv-badge { opacity: 1; transform: none; transition-delay: 2.4s; }
+
+        .amazon { display: none; max-width: 52rem; align-items: center; text-align: left; background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); }
+        .szene.is-bewertet .amazon { display: flex; animation: rise .6s 2.9s var(--ease) backwards; }
+        .amazon .kern-t { font-size: 1.22rem; }
+        .amazon .ref { margin-top: .35rem; }
+        .frage-2 { transition: opacity .4s; }
+        .szene.is-bewertet .frage-2 { opacity: .55; }
     </style>
 </head>
 <body>
     <nav id="nav"></nav>
 
     <main class="stage" id="stage">
+        <!-- Szene 1: Schätzfrage (Auflösung am Ende in der Werkzeugkiste) -->
+        <section class="szene" id="sz-frage">
+            <div class="szene-k rise" style="--d0:100ms">Eine Frage vorab</div>
+            <div class="szene-t rise" style="--d0:200ms">Wie viele fertige Normen gibt es heute für <em>Hochrisiko-KI?</em></div>
+            <div class="tipps">
+                <span class="tipp rise" style="--i:0;--d0:600ms">0</span>
+                <span class="tipp rise" style="--i:1;--d0:600ms">1</span>
+                <span class="tipp rise" style="--i:2;--d0:600ms">5</span>
+                <span class="tipp rise" style="--i:3;--d0:600ms">10+</span>
+            </div>
+            <div class="hand rise" style="--d0:1100ms">✋ Handzeichen! Die Auflösung gibt es am Ende.</div>
+            <span class="ref fade" style="--d0:1300ms">Gemeint: harmonisierte Normen mit Fundstelle im Amtsblatt (Art. 40 Abs. 1 KI-VO)</span>
+        </section>
+
+        <!-- Szene 2: Ihr seid die KI (Amazon-Fall, vereinfacht) -->
+        <section class="szene" id="sz-ki">
+            <div class="szene-k rise" style="--d0:100ms">Ihr seid die KI</div>
+            <div class="szene-t frage-2 rise" style="--d0:200ms">Wer bekommt <em>mehr Sterne?</em></div>
+            <div class="cvs">
+                <div class="cv cv--a rise" style="--i:0;--d0:450ms">
+                    <div class="cv-h"><span class="cv-av"><i class="fa-solid fa-user"></i></span><span class="cv-n">Bewerbung A</span></div>
+                    <ul>
+                        <li><i class="fa-solid fa-graduation-cap"></i>Informatik, B. Sc.</li>
+                        <li><i class="fa-solid fa-laptop-code"></i>5 Jahre Softwareentwicklung</li>
+                        <li><i class="fa-solid fa-chess-knight"></i>Leitung der Schach-AG</li>
+                    </ul>
+                    <div class="sterne"><i class="fa-solid fa-star an" style="--n:0"></i><i class="fa-solid fa-star an" style="--n:1"></i><i class="fa-solid fa-star an" style="--n:2"></i><i class="fa-solid fa-star an" style="--n:3"></i><i class="fa-solid fa-star" style="--n:4"></i></div>
+                </div>
+                <div class="cv cv--b rise" style="--i:1;--d0:450ms">
+                    <span class="cv-badge">abgewertet</span>
+                    <div class="cv-h"><span class="cv-av"><i class="fa-solid fa-user"></i></span><span class="cv-n">Bewerbung B</span></div>
+                    <ul>
+                        <li><i class="fa-solid fa-graduation-cap"></i>Informatik, B. Sc.</li>
+                        <li><i class="fa-solid fa-laptop-code"></i>5 Jahre Softwareentwicklung</li>
+                        <li><i class="fa-solid fa-chess-queen"></i><span>Leitung der <mark>Frauen</mark>-Schach-AG</span></li>
+                    </ul>
+                    <div class="sterne"><i class="fa-solid fa-star an" style="--n:0"></i><i class="fa-solid fa-star an" style="--n:1"></i><span class="fs"><i class="fa-solid fa-star" style="--n:2"></i><i class="fa-solid fa-star an faellt" style="--n:2"></i></span><span class="fs"><i class="fa-solid fa-star" style="--n:3"></i><i class="fa-solid fa-star an faellt" style="--n:3"></i></span><i class="fa-solid fa-star" style="--n:4"></i></div>
+                </div>
+            </div>
+            <div class="kern amazon">
+                <span class="kern-ic">!</span>
+                <span>
+                    <span class="kern-k">So geschehen bei Amazon</span>
+                    <span class="kern-t">Amazons experimentelle Recruiting-KI lernte aus 10 Jahren überwiegend männlicher Bewerbungen und wertete das Wort „women's“ ab. Martin baut bei BeamTech heute fast dasselbe.</span>
+                    <span class="ref">Vereinfachte Darstellung · nach Reuters (J. Dastin), 10.10.2018 · berichteter Fall, nicht gerichtlich festgestellt</span>
+                </span>
+            </div>
+        </section>
+
         <section class="hero hero--dark st-hero">
             <div class="rays"><span></span><span></span><span></span></div>
             <div class="hero-inner">
                 <div class="kicker fade" style="--d0:100ms">Die KI-VO und ihre Lücken</div>
-                <h1 class="display rise" style="--d0:150ms">Was gibt es schon – <span>und was steht drin?</span></h1>
+                <h1 class="display rise" style="--d0:150ms">Was gibt es schon, <span>und was steht drin?</span></h1>
             </div>
         </section>
 
@@ -111,12 +208,12 @@
                     <div class="bau-anls">
                         <div class="bau-anl">
                             <div class="bau-h"><i class="fa-solid fa-book-open"></i><b>Bauanleitung: Leitlinie</b><em>sagt WIE</em></div>
-                            <div class="bau-p">Erklärhilfe der EU-Kommission – rechtlich nicht verbindlich.</div>
+                            <div class="bau-p">Erklärhilfe der EU-Kommission, rechtlich nicht verbindlich.</div>
                             <span class="ref">z. B. Art. 6 Abs. 5, Art. 96 KI-VO</span>
                         </div>
                         <div class="bau-anl">
                             <div class="bau-h"><i class="fa-solid fa-screwdriver-wrench"></i><b>Bauanleitung: Harmonisierte Norm</b></div>
-                            <div class="bau-p">Technischer Standard – wer ihn einhält, bei dem wird vermutet, dass er die Pflicht erfüllt.</div>
+                            <div class="bau-p">Technischer Standard: Wer ihn einhält, bei dem wird vermutet, dass er die Pflicht erfüllt.</div>
                             <span class="ref">Art. 40 Abs. 1 KI-VO</span>
                         </div>
                     </div>
@@ -143,7 +240,7 @@
 
             <div class="kern st-kern rise" style="--d0:1000ms">
                 <span class="kern-ic">?</span>
-                <span><span class="kern-k">Die Lücke</span><span class="kern-t">Die KI-VO verweist an vielen Stellen auf solche Bauanleitungen – aber gibt es die schon?</span></span>
+                <span><span class="kern-k">Die Lücke</span><span class="kern-t">Die KI-VO verweist an vielen Stellen auf solche Bauanleitungen. Aber gibt es die schon?</span></span>
             </div>
         </div>
     </main>
@@ -153,8 +250,35 @@
     <script src="assets/daten.js"></script>
     <script src="assets/praes.js"></script>
     <script>
-        Praes.init({ station: 1, kapitel: 0 });
-        Praes.setSub('Martins Fall');
+    (function () {
+        'use strict';
+        // Ablauf: 0 Schätzfrage → 1 Lebensläufe → 2 Sterne vergeben → 3 Martins Fall
+        const stage = document.getElementById('stage');
+        const sz = [document.getElementById('sz-frage'), document.getElementById('sz-ki')];
+        const SUB = ['Einstieg · Schätzfrage', 'Einstieg · Ihr seid die KI', 'Einstieg · Der Amazon-Fall', 'Martins Fall'];
+        // Wer von einer späteren Seite zurückkommt, landet direkt bei Martin
+        let step = Praes.flags().from ? 3 : 0;
+
+        function show(s) {
+            step = s;
+            const el = s < 3 ? sz[s === 0 ? 0 : 1] : null;
+            sz.forEach(x => { if (x !== el) x.classList.remove('is-on'); });
+            if (el && !el.classList.contains('is-on')) el.classList.add('is-on');   // Einblenden nur beim Szenenwechsel
+            sz[1].classList.toggle('is-bewertet', s === 2);
+            stage.classList.toggle('has-szene', s < 3);
+            Praes.setKapitel(0);
+            Praes.setSub(SUB[s]);
+            Praes.setDock({ prev: s > 0 });
+            if (s === 3) Praes.fitHeadlines();
+        }
+
+        Praes.init({
+            station: 1, kapitel: 0,
+            onNext: () => { if (step < 3) { show(step + 1); return true; } },
+            onPrev: () => { if (step > 0) { show(step - 1); return true; } }
+        });
+        show(step);
+    })();
     </script>
 </body>
 </html>

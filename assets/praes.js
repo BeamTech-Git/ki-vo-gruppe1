@@ -1,8 +1,8 @@
 /* ══════════════════════════════════════════════════════════════════════
-   BeamTech · Martins KI-Check – gemeinsame Logik
+   Gruppe 1 · Martins KI-Check: gemeinsame Logik
    Navigation mit Story-Fortschritt, Präsentationsleiste, Tastatur, Modal
    Tasten:  → / PageDown / Leertaste = weiter   ← / PageUp = zurück
-            1–3 = Seite   Esc = Modal schließen   B = Bildschirm schwarz
+            1 bis 3 = Seite   Esc = Modal schließen   B = Bildschirm schwarz
 ══════════════════════════════════════════════════════════════════════ */
 (function () {
     'use strict';
@@ -122,7 +122,7 @@
 
         const nav = document.getElementById('nav');
         nav.className = 'nav';
-        nav.innerHTML = `<a class="brand" href="start.html" aria-label="Gruppe 1 – zur Startseite">${logo}<span class="brand-t"><b>Gruppe 1</b><small>Europarecht · KI-VO</small></span></a>
+        nav.innerHTML = `<a class="brand" href="start.html" aria-label="Gruppe 1, zur Startseite">${logo}<span class="brand-t"><b>Gruppe 1</b><small>Europarecht · KI-VO</small></span></a>
             <ol class="nav-steps">${links}</ol>
             <div class="story" id="story">
                 <span class="story-av">MK</span>
@@ -172,6 +172,32 @@
         p.disabled = station === 1;
         n.disabled = station === 3;
         if (station === 3) n.innerHTML = 'Ende <span class="arr">✓</span>';
+    }
+
+    // Für Seiten mit eigenen Szenen (Einstieg, Finale): Zurück/Weiter freischalten
+    function setDock(o) {
+        const p = document.getElementById('dockPrev');
+        const n = document.getElementById('dockNext');
+        if (!p) return;
+        if (o.prev != null) p.disabled = !o.prev;
+        if (o.next != null) {
+            n.disabled = !o.next;
+            n.innerHTML = o.next ? 'Weiter <span class="arr">→</span>' : 'Ende <span class="arr">✓</span>';
+        }
+    }
+
+    // Live-Countdown bis zum Geltungsbeginn der Hochrisiko-Pflichten (Anhang III)
+    const STICHTAG = new Date(2027, 11, 2, 0, 0, 0);
+    function countdown(el) {
+        const z = n => String(n).padStart(2, '0');
+        (function tick() {
+            if (!el.isConnected) return;
+            const ms = Math.max(0, STICHTAG - new Date());
+            const s = Math.floor(ms / 1000);
+            const d = Math.floor(s / 86400), h = Math.floor(s / 3600) % 24, m = Math.floor(s / 60) % 60;
+            el.innerHTML = `<b>${d}</b> Tage <span class="cd-t">${z(h)}:${z(m)}:${z(s % 60)}</span>`;
+            setTimeout(tick, 1000 - (Date.now() % 1000));
+        })();
     }
 
     function setSub(text) {
@@ -251,7 +277,7 @@
     }
 
     /* ── EU-Sternenkranz (Motiv der Gruppen-PPT) ───────────────────── */
-    function euRing() {
+    function ringSVG() {
         const stern = (cx, cy, r) => {
             let d = '';
             for (let i = 0; i < 10; i++) {
@@ -265,8 +291,15 @@
             const a = -Math.PI / 2 + s * Math.PI / 6;
             paths += `<path style="--s:${s}" d="${stern(50 + 40 * Math.cos(a), 50 + 40 * Math.sin(a), 7.5)}"/>`;
         }
+        return `<svg viewBox="0 0 100 100">${paths}</svg>`;
+    }
+
+    function euRing() {
         document.querySelectorAll('.hero-inner').forEach(h =>
-            h.insertAdjacentHTML('beforeend', `<div class="eu-ring" aria-hidden="true"><svg viewBox="0 0 100 100">${paths}</svg></div>`));
+            h.insertAdjacentHTML('beforeend', `<div class="eu-ring" aria-hidden="true">${ringSVG()}</div>`));
+        // Großer, ruhiger Sternenkranz im Hintergrund jeder Szene
+        document.querySelectorAll('.szene').forEach(s =>
+            s.insertAdjacentHTML('afterbegin', `<div class="eu-ring szene-ring" aria-hidden="true">${ringSVG()}</div>`));
     }
 
     /* ── Mauszeiger nach Inaktivität ausblenden (Beamer) ───────────── */
@@ -308,5 +341,5 @@
         setFlag('from', null);
     }
 
-    window.Praes = { init, ampel, ref, countUp, modal, modalSimple, setSub, setKapitel, go, esc, nb, fitHeadlines, flags };
+    window.Praes = { init, ampel, ref, countUp, modal, modalSimple, setSub, setKapitel, setDock, countdown, go, esc, nb, fitHeadlines, flags };
 })();

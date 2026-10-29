@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /* ══════════════════════════════════════════════════════════════════════
-   BeamTech · Martins KI-Check – gemeinsames Design-System
+   Gruppe 1 · Martins KI-Check: gemeinsames Design-System
    Angelehnt an die Gruppen-PPT „Lückenschluss in der KI-Verordnung“:
    EU-Navy + Königsblau + EU-Gelb, Cambria-Titel, Calibri-Text, Sternenkranz.
    Skalierung: 1rem = 16px bei 1280×720, 24px bei 1920×1080 (16:9-fest)
@@ -8,15 +8,15 @@
 
 :root {
     /* Farben aus dem PPT-Theme */
-    --navy:     #0D1B45;   /* dk2 – Titelfolie, dunkle Karten */
-    --ink:      #1A2238;   /* dk1 – Fließtext */
-    --navy-700: #1E3F94;   /* accent1 – Königsblau */
+    --navy:     #0D1B45;   /* dk2: Titelfolie, dunkle Karten */
+    --ink:      #1A2238;   /* dk1: Fließtext */
+    --navy-700: #1E3F94;   /* accent1: Königsblau */
     --navy-600: #23469C;
     --mid:      #5470C6;   /* accent3 */
     --sky:      #5470C6;
     --pale:     #C9D4F0;   /* accent5 */
-    --card:     #EEF2FA;   /* lt2 – Kartenfläche */
-    --accent:   #FFCC00;   /* accent2 – EU-Gelb */
+    --card:     #EEF2FA;   /* lt2: Kartenfläche */
+    --accent:   #FFCC00;   /* accent2: EU-Gelb */
     --accent-2: #FFD84D;
     --accent-50:#FFF4C7;   /* accent6 */
 
@@ -321,6 +321,27 @@ kbd {
 }
 .msrc a:hover { border-bottom-color: var(--navy-700); }
 .msrc a small { font-weight: 400; color: var(--muted); font-size: .8rem; }
+
+/* ══ SZENEN: Einstieg & Finale, bildschirmfüllend auf Navy ══════════ */
+.stage.has-szene { overflow: hidden; }
+.stage.has-szene > :not(.szene.is-on) { display: none; }
+.szene {
+    position: absolute; inset: 0; z-index: 5;
+    display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.2rem;
+    padding: 1.4rem var(--pad-x); overflow: hidden; text-align: center;
+    background: radial-gradient(ellipse 80% 70% at 50% 0%, #1D3478 0%, var(--navy) 70%);
+    color: #fff;
+}
+.szene.is-on { display: flex; }
+.szene > * { position: relative; z-index: 1; }
+.szene-ring { position: absolute !important; z-index: 0 !important; right: -6rem; top: 50%; transform: translateY(-50%); width: 30rem; height: 30rem; opacity: .13; }
+.szene-k { font-size: .82rem; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: var(--accent); }
+.szene-t { max-width: 52rem; font-family: var(--f-display); font-size: 3rem; font-weight: 700; line-height: 1.12; letter-spacing: -.01em; font-size-adjust: none; }
+.szene-t em { font-style: normal; color: var(--accent); }
+.szene-s { max-width: 46rem; font-size: 1.3rem; line-height: 1.45; color: rgba(255,255,255,.88); }
+.szene .ref { color: rgba(255,255,255,.7); margin-top: 0; }
+.hand { display: inline-flex; align-items: center; gap: .6rem; padding: .45rem 1.1rem; border-radius: 99px; background: rgba(255,204,0,.14); border: 1px solid rgba(255,204,0,.45); color: var(--accent); font-size: 1.05rem; font-weight: 700; }
+.cd-t { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
 
 /* ══ HILFSKLASSEN & ANIMATION ═══════════════════════════════════════ */
 .rise { animation: rise .6s var(--ease) backwards; animation-delay: calc(var(--i, 0) * 65ms + var(--d0, 0ms)); }
