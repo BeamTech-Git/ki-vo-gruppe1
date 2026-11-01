@@ -10,7 +10,7 @@
     const STATIONEN = [
         { n: 1, href: 'start.html',        label: 'Start' },
         { n: 2, href: 'einstufung.html',   label: 'Gefährlich? & Pflichten' },
-        { n: 3, href: 'status-board.html', label: 'Werkzeugkiste' }
+        { n: 3, href: 'status-board.html', label: 'Finale' }
     ];
 
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g,
@@ -36,8 +36,27 @@
              + `<span class="ampel-l"><i></i><i></i><i></i></span><span>${esc(o.label || s.label)}</span></span>`;
     }
 
-    // Kleine Fundstelle für die Prüfer (grau, Mono)
-    const ref = (t, cls) => `<span class="ref${cls ? ' ' + cls : ''}">${nb(esc(t))}</span>`;
+    // Kleine Fundstelle für die Prüfer; mit key klickbar und öffnet den Gesetzestext
+    const ref = (t, cls, key) => key && typeof WORTLAUT !== 'undefined' && WORTLAUT[key]
+        ? `<span role="button" tabindex="0" class="ref ref--w${cls ? ' ' + cls : ''}" data-wortlaut="${esc(key)}">${nb(esc(t))}</span>`
+        : `<span class="ref${cls ? ' ' + cls : ''}">${nb(esc(t))}</span>`;
+
+    // Gesetzestext-Fenster: exakter Wortlaut, ⟦…⟧ wird gelb markiert
+    function zeigeWortlaut(key) {
+        const w = WORTLAUT[key];
+        if (!w) return;
+        const mark = s => nb(esc(s)).replace(/⟦/g, '<mark class="gz-m">').replace(/⟧/g, '</mark>');
+        modal.open(`<div class="modal-head">
+                <div>
+                    <div class="modal-kicker"><span class="gz-k"><i class="fa-solid fa-book-open"></i> Gesetzestext</span></div>
+                    <h3>${nb(esc(w.titel))}</h3>
+                </div>
+                <button class="modal-x" data-close aria-label="Schließen">✕</button>
+            </div>
+            <div class="modal-body">
+                ${w.bloecke.map(b => `<div class="gz-b"><div class="gz-l">${nb(esc(b.label))}</div><p class="gz-t">${mark(b.text)}</p></div>`).join('')}
+            </div>`);
+    }
 
     function countUp(el, to, o) {
         o = o || {};
@@ -140,7 +159,7 @@
         const dock = document.getElementById('dock');
         dock.className = 'dock';
         dock.innerHTML = `
-            <div class="dock-foot"><b>Europarecht</b> · KI-VO · Quellenstand: ${QUELLENSTAND}</div>
+            <div class="dock-foot"><b>Europarecht</b> · KI-VO</div>
             <div class="dock-ctrl">
                 <button class="dock-btn" id="dockPrev"><span class="arr">←</span> Zurück</button>
                 <div class="dock-pos">Seite <b>${station}</b>/3<span class="dock-sub" id="dockSub"></span></div>
@@ -323,6 +342,15 @@
         modal.build();
         document.addEventListener('keydown', onKey);
 
+        // Klick auf eine Fundstelle mit „Wortlaut“ öffnet den Gesetzestext
+        document.addEventListener('click', e => {
+            const w = e.target.closest('[data-wortlaut]');
+            if (!w) return;
+            e.preventDefault();
+            e.stopPropagation();
+            zeigeWortlaut(w.dataset.wortlaut);
+        }, true);
+
         // Interne Seitenlinks mit Ausblend-Übergang
         document.addEventListener('click', e => {
             const a = e.target.closest('a[href]');
@@ -341,5 +369,5 @@
         setFlag('from', null);
     }
 
-    window.Praes = { init, ampel, ref, countUp, modal, modalSimple, setSub, setKapitel, setDock, countdown, go, esc, nb, fitHeadlines, flags };
+    window.Praes = { init, ampel, ref, zeigeWortlaut, countUp, modal, modalSimple, setSub, setKapitel, setDock, countdown, go, esc, nb, fitHeadlines, flags };
 })();

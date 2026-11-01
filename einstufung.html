@@ -204,7 +204,7 @@
                     <div class="q-nr">Frage ${n.nr} von 2</div>
                     <div class="q-frage">${esc(n.frage)}</div>
                     <div class="q-hilfe">${esc(n.hilfe)}</div>
-                    ${ref(n.ref)}
+                    ${ref(n.ref, null, n.wortlaut)}
                 </div>
                 <div class="q-side">
                     <div class="q-btns">${btn('yes', 'Ja')}${btn('no', 'Nein')}</div>
@@ -222,7 +222,7 @@
             card.querySelectorAll('.ans').forEach(b => b.classList.toggle('is-chosen', b.dataset.a === a));
             document.getElementById('reveal').innerHTML = `<div class="reveal">
                 <div class="reveal-t">${esc(n[a].text)}</div>
-                ${ref(n[a].ref)}
+                ${ref(n[a].ref, null, n[a].wortlaut)}
             </div>`;
         }
 
@@ -260,12 +260,10 @@
                     </div>
                     <div class="anl-def"><i class="fa-solid fa-book-open"></i>${esc(e.anleitung.begriff)}</div>
                     <div class="anl-t">${nb(esc(e.anleitung.text))}</div>
-                    ${ref(e.anleitung.ref)}
-                    <a href="status-board.html">Zur Werkzeugkiste →</a>
-                </article>
+                    ${ref(e.anleitung.ref, null, e.anleitung.wortlaut)}                </article>
                 <div class="kern res-kern rise" style="--d0:900ms">
-                    <span class="kern-ic">→</span>
-                    <span><span class="kern-k">Kernsatz</span><span class="kern-t">${esc(e.kern)}</span></span>
+                    <span class="kern-ic">?</span>
+                    <span class="kern-t">${esc(e.kern)}</span>
                 </div>` : `
                 <article class="card anl">
                     <div class="anl-k"><i class="fa-solid fa-rotate-left"></i>Martins Fall liegt anders</div>
@@ -292,14 +290,14 @@
                         <span class="pf-t">${esc(p.titel)}</span>
                         <span class="pf-b">„${esc(p.beispiel)}“</span>
                         ${ampel(p.status, { label: p.anleitung, delay: 700 + i * 120 })}
-                        ${ref(p.ref)}
+                        ${ref(p.ref, null, p.wortlaut)}
                     </button>`).join('')}
                 </div>
                 <div class="k2-end">
                     <div class="card begriff rise" style="--d0:1000ms">
                         <div class="begriff-k">Erinnerung</div>
                         <div class="begriff-t"><b>${esc(FACHBEGRIFF.wort)}</b> = ${esc(FACHBEGRIFF.satz)}</div>
-                        ${ref(FACHBEGRIFF.ref)}
+                        ${ref(FACHBEGRIFF.ref, null, FACHBEGRIFF.wortlaut)}
                     </div>
                     <div class="kern rise" style="--d0:1250ms">
                         <span class="kern-ic">→</span>

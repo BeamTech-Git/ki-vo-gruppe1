@@ -243,6 +243,17 @@ kbd {
 }
 .on-dark .ref, .hero--dark .ref { color: rgba(255,255,255,.82); }
 
+/* Fundstelle mit Gesetzestext zum Aufklappen */
+.ref--w { cursor: pointer; text-align: left; text-decoration: underline dotted rgba(30,63,148,.45); text-underline-offset: .2em; transition: color .2s; }
+.ref--w:hover { color: var(--navy-700); }
+.gz-k { display: inline-flex; align-items: center; gap: .4rem; padding: .15rem .65rem; border-radius: 99px; background: var(--accent); color: var(--navy); font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.modal:has(.gz-b) { width: min(48rem, 100%); }
+.gz-b { padding: .65rem 1rem .75rem; border-left: 3px solid var(--navy-700); border-radius: 0 .55rem .55rem 0; background: var(--card); }
+.gz-l { font-size: .74rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--navy-700); }
+.gz-t { margin-top: .3rem; font-family: var(--f-display); font-size: 1.12rem; line-height: 1.55; color: var(--ink); font-size-adjust: none; }
+.gz-m { background: linear-gradient(transparent 40%, #ffe066 40%); color: inherit; padding: 0 .1em; font-weight: 700; }
+.gz-n { font-size: .9rem; font-style: italic; color: var(--muted); }
+
 /* Kernsatz = dunkle Karte wie „Gedankenexperiment“ in der PPT */
 .kern {
     position: relative; display: flex; align-items: center; gap: 1rem; overflow: hidden;
